@@ -1,6 +1,7 @@
 package com.legacy.demo.controllers;
 
 import com.legacy.demo.classes.CartItemData;
+import com.legacy.demo.entities.Cart;
 import com.legacy.demo.services.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,17 @@ public class CartController {
         String cartId = cartService.createCartWithItems(items);
         return new ResponseEntity<>(cartId, HttpStatus.CREATED);
     }
+
+    @PatchMapping("/update/{cartId}")
+    public ResponseEntity<?> updateCart(@PathVariable String cartId,
+                                         @RequestBody Cart updateRequest){
+        return this.cartService.updateCart(
+                cartId,
+                updateRequest.getItems(),
+                updateRequest.getStatus()
+        );
+    }
+
 
 
 }

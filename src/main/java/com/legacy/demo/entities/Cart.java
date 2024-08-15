@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import java.util.List;
 
@@ -19,6 +18,7 @@ public class Cart {
     @CollectionTable(name = "cart_items", joinColumns = @JoinColumn(name = "cart_id"))
     private List<CartItemData> items;
     private String status;
+
 
     public String getCartId() {
         return cartId;

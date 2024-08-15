@@ -4,13 +4,12 @@ import com.legacy.demo.entities.Cart;
 import com.legacy.demo.classes.CartItemData;
 import com.legacy.demo.repos.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class CartService {
@@ -51,5 +50,22 @@ public class CartService {
         } while (generatedIds.contains(orderId)); // Ensure uniqueness
         generatedIds.add(orderId); // Add the new ID to the set
         return orderId;
+    }
+
+    public ResponseEntity<?> updateCart(String cartId,
+                                        List<CartItemData> items,
+                                        String status){
+        Optional<Cart> found = this.cartRepository.findByCartId(cartId);
+        if (found.isEmpty()){
+            return new ResponseEntity<>("No Cart found with ID " + cartId, HttpStatus.NOT_FOUND);
+        }
+
+        Cart toUpdate = found.get();
+
+        if (items != null) toUpdate.setItems(items);
+        if (status != null) toUpdate.setStatus(status);
+
+        Cart updated = this.cartRepository.save(toUpdate);
+        return ResponseEntity.ok(updated);
     }
 }
