@@ -1,55 +1,55 @@
 package com.legacy.demo.services;
 
-import com.legacy.demo.repos.CartRepo;
 import com.legacy.demo.entities.Cart;
-import com.legacy.demo.dtos.CartDto;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.legacy.demo.classes.CartItemData;
+import com.legacy.demo.repos.CartRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+
 @Service
 public class CartService {
-    private final CartRepo repo;
 
-    public CartService(CartRepo repo) {this.repo = repo;}
+    @Autowired
+    private CartRepository cartRepository;
 
-    public List<CartDto> getAll() {
-        List<CartDto> dtos = new ArrayList<>();
-        List<Cart> found = this.repo.findAll();
-        for (Cart cart : found) {
-            dtos.add(new CartDto(cart));
-        }
-        return dtos;
+    private static final int ID_LENGTH = 6;
+    private static final Set<String> generatedIds = new HashSet<>(); // Track generated IDs to ensure uniqueness
+    private static final Random random = new Random();
+
+
+    @Transactional
+    public String createCartWithItems(List<CartItemData> items) {
+
+        String cartId = generateOrderId();
+
+        Cart cart = new Cart();
+        cart.setCartId(cartId);
+        cart.setItems(items);
+        cart.setStatus("in progress");
+
+        cartRepository.save(cart);
+        return cartId;
     }
 
-    public ResponseEntity<?> getCart(Integer id){
-        Optional<Cart> found = this.repo.findById(id);
-        if(found.isEmpty()){
-            return new ResponseEntity<>("no Cart found with cart id " + id, HttpStatus.NOT_FOUND);
-        }
-            return ResponseEntity.ok(new CartDto(found.get()));
+
+    public List<CartItemData> getCart(String cartId) {
+        return cartRepository.findById(cartId)
+                .map(Cart::getItems)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
     }
 
-    public ResponseEntity<?> addCart(Cart newCart){
-        Cart created = this.repo.save(newCart);
-        return new ResponseEntity<>(new CartDto(created), HttpStatus.CREATED);
+    private String generateOrderId() {
+        String orderId;
+        do {
+            orderId = String.format("%06d", random.nextInt(1000000)); // Generates a 6-digit number
+        } while (generatedIds.contains(orderId)); // Ensure uniqueness
+        generatedIds.add(orderId); // Add the new ID to the set
+        return orderId;
     }
-
-    public ResponseEntity<?> updateCart(Integer id, Double cartTotal, Double serviceCharge, String orderStatus){
-        Optional<Cart> found = this.repo.findById(id);
-        if(found.isEmpty()) {
-            return new ResponseEntity<>("No Cart found with id "+ id, HttpStatus.NOT_FOUND);
-        }
-        Cart toUpdate = found.get();
-        if(cartTotal != null) toUpdate.setCartTotal(cartTotal);
-        if(serviceCharge != null) toUpdate.setServiceCharge(serviceCharge);
-        if(orderStatus != null) toUpdate.setOrderStatus(orderStatus);
-        Cart updated = this.repo.save(toUpdate);
-        return ResponseEntity.ok(new CartDto(updated));
-    }
-
 }

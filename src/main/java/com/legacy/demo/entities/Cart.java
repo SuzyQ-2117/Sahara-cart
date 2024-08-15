@@ -1,75 +1,46 @@
 package com.legacy.demo.entities;
 
-
-import jakarta.persistence.*;
+import com.legacy.demo.classes.CartItemData;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
 import java.util.List;
+
 @Entity
 public class Cart {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    @OneToMany (mappedBy="cart")
-    private List<CartItem> cartItemList;
+    private String cartId;
 
-    private Double cartTotal;
-    private Double serviceCharge;
-    private String orderStatus;
+    @ElementCollection
+    @CollectionTable(name = "cart_items", joinColumns = @JoinColumn(name = "cart_id"))
+    private List<CartItemData> items;
+    private String status;
 
-    public Cart(Integer id, List<CartItem> cartItemList, Double cartTotal, Double serviceCharge, String orderStatus) {
-        this.id = id;
-        this.cartItemList = cartItemList;
-        this.cartTotal = cartTotal;
-        this.serviceCharge = serviceCharge;
-        this.orderStatus = orderStatus;
+    public String getCartId() {
+        return cartId;
     }
 
-    public Cart() {
+    public void setCartId(String cartId) {
+        this.cartId = cartId;
     }
 
-    public Cart(Integer id, Double cartTotal, Double serviceCharge, String orderStatus) {
-        this.id = id;
-        this.cartTotal = cartTotal;
-        this.serviceCharge = serviceCharge;
-        this.orderStatus = orderStatus;
+    public List<CartItemData> getItems() {
+        return items;
     }
 
-    public Integer getId() {
-        return id;
+    public void setItems(List<CartItemData> items) {
+        this.items = items;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public String getStatus() {
+        return status;
     }
 
-    public List<CartItem> getCartItemList() {
-        return cartItemList;
-    }
-
-    public void setCartItemList(List<CartItem> cartItemList) {
-        this.cartItemList = cartItemList;
-    }
-
-    public Double getCartTotal() {
-        return cartTotal;
-    }
-
-    public void setCartTotal(Double cartTotal) {
-        this.cartTotal = cartTotal;
-    }
-
-    public Double getServiceCharge() {
-        return serviceCharge;
-    }
-
-    public void setServiceCharge(Double serviceCharge) {
-        this.serviceCharge = serviceCharge;
-    }
-
-    public String getOrderStatus() {
-        return orderStatus;
-    }
-
-    public void setOrderStatus(String orderStatus) {
-        this.orderStatus = orderStatus;
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
